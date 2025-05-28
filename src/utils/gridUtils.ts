@@ -106,6 +106,34 @@ function selectRepresentativeLines(
   return representativeLines;
 }
 
+// DEBUG
+function validateRepresentativeLines(
+  filteredLines: {
+    type: "horizontal" | "vertical";
+    coord: [number, number];
+  }[][],
+  representativeLines: {
+    type: "horizontal" | "vertical";
+    coord: [number, number];
+  }[]
+): void {
+  filteredLines.forEach((lines) => {
+    if (lines.length > 0) {
+      const hasRepresentative = lines.some((line) =>
+        representativeLines.some(
+          (repLine) =>
+            repLine.type === line.type &&
+            repLine.coord[0] === line.coord[0] &&
+            repLine.coord[1] === line.coord[1]
+        )
+      );
+      if (!hasRepresentative) {
+        console.warn("Filtered lines do not have a representative line.");
+      }
+    }
+  });
+}
+
 function generateWalls(
   answerPath: [number, number][],
   remainingPaths: [number, number][][],
@@ -126,6 +154,9 @@ function generateWalls(
   );
 
   const representativeLines = selectRepresentativeLines(filteredLines);
+
+  // DEBUG
+  validateRepresentativeLines(filteredLines, representativeLines);
 
   const horizontal = Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => false)
