@@ -37,6 +37,7 @@ const Grid: React.FC<GridProps> = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              fontSize: `${cellSize * 0.4}px`,
               borderTop:
                 rowIndex === 0
                   ? borderStyles.thick

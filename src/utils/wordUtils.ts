@@ -1,4 +1,4 @@
-export async function getRandomWord(): Promise<string> {
+export async function getRandomWord(n: number): Promise<string> {
   const response = await fetch(
     "https://raw.githubusercontent.com/F-mM7/hamiltonian-path-puzzle/refs/heads/gh-pages/wordList.txt"
   );
@@ -9,6 +9,9 @@ export async function getRandomWord(): Promise<string> {
   const words = fileContent
     .split("\n")
     .map((word) => word.trim())
-    .filter(Boolean);
+    .filter((word) => word.length === n); // n文字の単語をフィルタリング
+  if (words.length === 0) {
+    throw new Error(`No words found with ${n} characters.`);
+  }
   return words[Math.floor(Math.random() * words.length)];
 }

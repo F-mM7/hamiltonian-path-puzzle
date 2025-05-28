@@ -252,8 +252,10 @@ export async function generateGridData(rows: number, cols: number) {
 
     walls = generateWalls(answerPath, remainingPaths, rows, cols);
 
-    answerWord = await getRandomWord(); // 非同期処理を待つ
-    step = Math.floor(answerPath.length / answerWord.length);
+    step = Math.floor(Math.random() * (8 - 3 + 1)) + 3; // 4から8のランダムな値を設定
+
+    const answerLength = Math.floor((answerPath.length - 1) / step);
+    answerWord = await getRandomWord(answerLength); // 非同期処理を待つ
 
     answerPath.forEach(([r, c], index) => {
       if (index === 0) cellContent[r][c] = "Ｓ";

@@ -35,25 +35,41 @@ function App() {
   };
 
   if (!gridData) {
-    return <div>Loading...</div>; // 初期ロード中の表示
+    return (
+      <div style={{ textAlign: "center", marginTop: "20px" }}>Loading...</div>
+    ); // 初期ロード中の表示
   }
 
   const { cellContent, walls, answerWord, step } = gridData;
 
-  console.log(answerWord);
   return (
-    <>
-      <>{step}</>
-      <Grid
-        cellSize={50}
-        rows={rows}
-        cols={cols}
-        cellContent={cellContent}
-        borderStyles={borderStyles}
-        walls={walls}
-      />
+    <div style={{ textAlign: "center", padding: "20px" }}>
+      <h1 style={{ marginBottom: "20px" }}>Hamiltonian Path Puzzle</h1>
+      <p style={{ marginBottom: "10px" }}>
+        SからGへ、全てのマスをちょうど1度ずつ通り辿れ。
+      </p>
+      <p style={{ marginBottom: "20px" }}>
+        Sを1マス目としたとき、<strong> {step} </strong>
+        の倍数マス目の平仮名を順に拾え。
+      </p>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "20px",
+        }}
+      >
+        <Grid
+          cellSize={80}
+          rows={rows}
+          cols={cols}
+          cellContent={cellContent}
+          borderStyles={borderStyles}
+          walls={walls}
+        />
+      </div>
       <AnswerCheck answerWord={answerWord} onCorrect={handleAnswerCorrect} />
-    </>
+    </div>
   );
 }
 
