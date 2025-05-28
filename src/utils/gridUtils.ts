@@ -1,3 +1,5 @@
+import { getRandomWord } from "./wordUtils";
+
 // 型定義
 export interface Walls {
   horizontal: boolean[][];
@@ -238,6 +240,8 @@ export function generateGridData(rows: number, cols: number) {
 
   let answerPath: [number, number][] | null = null;
   let walls: Walls = { horizontal: [], vertical: [] };
+  let answerWord = "";
+  let step = 0;
 
   if (start && goal) {
     const paths = findHamiltonianPaths(start, goal, rows, cols);
@@ -248,14 +252,23 @@ export function generateGridData(rows: number, cols: number) {
 
     walls = generateWalls(answerPath, remainingPaths, rows, cols);
 
+    answerWord = getRandomWord(); // 外部ファイルからランダムに選択
+    step = Math.floor(answerPath.length - 1) / answerWord.length;
+
     answerPath.forEach(([r, c], index) => {
-      if (!decidedCells.has(`${r}-${c}`)) {
-        cellContent[r][c] = (index + 1).toString();
+      if (index === 0) cellContent[r][c] = "Ｓ";
+      else if (index === answerPath?.length - 1) cellContent[r][c] = "Ｇ";
+      else if ((index + 1) % step === 0) {
+        cellContent[r][c] = answerWord[(index + 1) / step - 1];
+      } else {
+        cellContent[r][c] = String.fromCharCode(
+          0x3041 + Math.floor(Math.random() * 86)
+        );
       }
     });
 
-    return { cellContent, answerPath, walls };
+    return { cellContent, answerPath, walls, answerWord, step };
   }
 
-  return { cellContent, answerPath, walls };
+  return { cellContent, answerPath, walls, answerWord, step };
 }
