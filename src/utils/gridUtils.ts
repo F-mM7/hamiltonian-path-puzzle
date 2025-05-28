@@ -94,14 +94,45 @@ function selectRepresentativeLines(
     coord: [number, number];
   }[] = [];
 
-  //TODO アルゴリズムを改善し、下記制約を満たしたまま、representativeLinesが最も短くなるようにする
-  //制約 : filterdLinesの各linesのうち少なくとも1つがrepresentativeLinesに含まれるようにする
-  filteredLines.forEach((lines) => {
-    if (lines.length > 0) {
-      const randomLine = lines[Math.floor(Math.random() * lines.length)];
-      representativeLines.push(randomLine);
+  const uncoveredSets = new Set<number>();
+  filteredLines.forEach((_, index) => uncoveredSets.add(index));
+
+  while (uncoveredSets.size > 0) {
+    const lineCoverage = new Map<string, Set<number>>();
+
+    filteredLines.forEach((lines, index) => {
+      if (uncoveredSets.has(index)) {
+        lines.forEach((line) => {
+          const lineKey = `${line.type}-${line.coord[0]}-${line.coord[1]}`;
+          if (!lineCoverage.has(lineKey)) {
+            lineCoverage.set(lineKey, new Set());
+          }
+          lineCoverage.get(lineKey)?.add(index);
+        });
+      }
+    });
+
+    let bestLine: string | null = null;
+    let maxCoverage = 0;
+
+    lineCoverage.forEach((coveredSets, lineKey) => {
+      if (coveredSets.size > maxCoverage) {
+        bestLine = lineKey;
+        maxCoverage = coveredSets.size;
+      }
+    });
+
+    if (bestLine) {
+      const [type, r, c] = bestLine.split("-");
+      representativeLines.push({
+        type: type as "horizontal" | "vertical",
+        coord: [parseInt(r, 10), parseInt(c, 10)],
+      });
+
+      const coveredSets = lineCoverage.get(bestLine)!;
+      coveredSets.forEach((setIndex) => uncoveredSets.delete(setIndex));
     }
-  });
+  }
 
   return representativeLines;
 }
