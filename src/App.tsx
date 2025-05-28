@@ -44,12 +44,12 @@ function App() {
 
   return (
     <div style={{ textAlign: "center", padding: "20px" }}>
-      <h1 style={{ marginBottom: "20px" }}>Hamiltonian Path Puzzle</h1>
       <p style={{ marginBottom: "10px" }}>
         SからGへ、全てのマスをちょうど1度ずつ通り辿れ。
       </p>
       <p style={{ marginBottom: "20px" }}>
-        Sを1マス目としたとき、<strong> {step} </strong>
+        Sを1マス目としたとき、
+        <strong style={{ fontSize: "24px" }}> {step} </strong>
         の倍数マス目の平仮名を順に拾え。
       </p>
       <div
