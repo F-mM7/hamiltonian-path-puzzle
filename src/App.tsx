@@ -13,7 +13,7 @@ function App() {
 
   const borderStyles = {
     thin: "1px solid gray",
-    thick: "2px solid white",
+    thick: "3px solid white",
   };
 
   return (
