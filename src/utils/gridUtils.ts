@@ -66,7 +66,7 @@ function generateAllHamiltonianPaths(
   return paths;
 }
 
-function generateLineList(path: [number, number][]): {
+function passingLineList(path: [number, number][]): {
   type: "horizontal" | "vertical";
   coord: [number, number];
 }[] {
@@ -93,23 +93,48 @@ function wallList(
   rows: number,
   cols: number
 ): Walls {
-  const lineList = generateLineList(answerPath);
-  console.log("Lines traversed by answerPath:", lineList);
+  const answerPassingLines = passingLineList(answerPath);
+  const remainsPassingLines = remainingPaths.map(passingLineList);
+
+  const filteredRemainingLines = remainsPassingLines.map((lines) =>
+    lines.filter(
+      (line) =>
+        !answerPassingLines.some(
+          (answerLine) =>
+            answerLine.type === line.type &&
+            answerLine.coord[0] === line.coord[0] &&
+            answerLine.coord[1] === line.coord[1]
+        )
+    )
+  );
+
+  const selectedLines: {
+    type: "horizontal" | "vertical";
+    coord: [number, number];
+  }[] = [];
+  // filteredRemainingLinesの各linesから、少なくとも1つのlineがserlectedLinesに含まれるようにする
+
+  filteredRemainingLines.forEach((lines) => {
+    if (lines.length > 0) {
+      const randomLine = lines[Math.floor(Math.random() * lines.length)];
+      selectedLines.push(randomLine);
+    }
+  });
 
   const horizontal = Array.from({ length: rows }, () =>
-    Array.from({ length: cols }, () => true)
+    Array.from({ length: cols }, () => false)
   );
   const vertical = Array.from({ length: rows }, () =>
-    Array.from({ length: cols }, () => true)
+    Array.from({ length: cols }, () => false)
   );
 
-  for (const { type, coord } of lineList) {
+  for (const { type, coord } of selectedLines) {
     const [r, c] = coord;
 
     if (type === "horizontal") {
-      horizontal[r][c] = false;
+      horizontal[r][c] = true;
     } else if (type === "vertical") {
-      vertical[r][c] = false;
+      vertical[r][c] = true;
     }
   }
 
@@ -148,6 +173,8 @@ export function generateGridData(rows: number, cols: number) {
   }
 
   let answerPath: [number, number][] | null = null;
+  let walls: Walls = { horizontal: [], vertical: [] }; // 初期化
+
   if (start && goal) {
     const paths = generateAllHamiltonianPaths(start, goal, rows, cols);
 
@@ -157,7 +184,7 @@ export function generateGridData(rows: number, cols: number) {
     const remainingPaths = paths.filter((path) => path !== answerPath);
     console.log("Remaining Hamiltonian Paths:", remainingPaths);
 
-    const walls = wallList(answerPath, remainingPaths, rows, cols);
+    walls = wallList(answerPath, remainingPaths, rows, cols); // 初期化済みのwallsに値を代入
 
     answerPath.forEach(([r, c], index) => {
       if (!decidedCells.has(`${r}-${c}`)) {
@@ -168,5 +195,5 @@ export function generateGridData(rows: number, cols: number) {
     return { cellContent, answerPath, walls };
   }
 
-  return { cellContent, answerPath, walls };
+  return { cellContent, answerPath, walls }; // 初期化済みのwallsを返す
 }
