@@ -44,12 +44,15 @@ function App() {
 
   return (
     <div style={{ textAlign: "center", padding: "20px" }}>
-      <p style={{ marginBottom: "10px" }}>
+      <p style={{ marginBottom: "16px", lineHeight: "1.5" }}>
+        隣り合ったマスに移動できるが、太線は通過できない。
+      </p>
+      <p style={{ marginBottom: "16px", lineHeight: "1.5" }}>
         SからGへ、全てのマスをちょうど1度ずつ通り辿れ。
       </p>
-      <p style={{ marginBottom: "20px" }}>
+      <p style={{ marginBottom: "16px", lineHeight: "1.5" }}>
         Sを1マス目としたとき、
-        <strong style={{ fontSize: "24px" }}> {step} </strong>
+        <strong style={{ fontSize: "24px", lineHeight: "1" }}> {step} </strong>
         の倍数マス目の平仮名を順に拾え。
       </p>
       <div
