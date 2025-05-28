@@ -1,4 +1,5 @@
 import React from "react";
+import type { Walls } from "../utils/gridUtils";
 
 interface GridProps {
   rows: number;
@@ -6,8 +7,7 @@ interface GridProps {
   cellContent: string[][];
   borderStyles: { thin: string; thick: string };
   cellSize: number;
-  horizontalLine: boolean[][]; // 新しいプロパティ
-  verticalLine: boolean[][]; // 新しいプロパティ
+  walls: Walls;
 }
 
 const Grid: React.FC<GridProps> = ({
@@ -16,8 +16,7 @@ const Grid: React.FC<GridProps> = ({
   cellContent,
   borderStyles,
   cellSize,
-  horizontalLine,
-  verticalLine,
+  walls: { horizontal, vertical },
 }) => {
   return (
     <div
@@ -42,25 +41,25 @@ const Grid: React.FC<GridProps> = ({
                 rowIndex === 0
                   ? borderStyles.thick
                   : borderStyles[
-                      horizontalLine[rowIndex - 1][colIndex] ? "thick" : "thin"
+                      horizontal[rowIndex - 1][colIndex] ? "thick" : "thin"
                     ],
               borderLeft:
                 colIndex === 0
                   ? borderStyles.thick
                   : borderStyles[
-                      verticalLine[rowIndex][colIndex - 1] ? "thick" : "thin"
+                      vertical[rowIndex][colIndex - 1] ? "thick" : "thin"
                     ],
               borderRight:
                 colIndex === cols - 1
                   ? borderStyles.thick
                   : borderStyles[
-                      verticalLine[rowIndex][colIndex] ? "thick" : "thin"
+                      vertical[rowIndex][colIndex] ? "thick" : "thin"
                     ],
               borderBottom:
                 rowIndex === rows - 1
                   ? borderStyles.thick
                   : borderStyles[
-                      horizontalLine[rowIndex][colIndex] ? "thick" : "thin"
+                      horizontal[rowIndex][colIndex] ? "thick" : "thin"
                     ],
             }}
           >

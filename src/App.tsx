@@ -6,10 +6,7 @@ function App() {
   const rows = 5;
   const cols = 5;
 
-  const { cellContent, horizontalLine, verticalLine } = generateGridData(
-    rows,
-    cols
-  );
+  const { cellContent, walls } = generateGridData(rows, cols);
 
   const borderStyles = {
     thin: "1px solid gray",
@@ -24,8 +21,7 @@ function App() {
         cols={cols}
         cellContent={cellContent}
         borderStyles={borderStyles}
-        horizontalLine={horizontalLine}
-        verticalLine={verticalLine}
+        walls={walls}
       />
     </>
   );
