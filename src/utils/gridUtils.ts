@@ -4,56 +4,7 @@ export interface Walls {
   vertical: boolean[][];
 }
 
-function dfs(
-  current: [number, number],
-  goal: [number, number],
-  visited: Set<string>,
-  path: [number, number][],
-  paths: [number, number][][],
-  rows: number,
-  cols: number
-) {
-  const [r, c] = current;
-  if (
-    visited.size === rows * cols - 1 &&
-    current[0] === goal[0] &&
-    current[1] === goal[1]
-  ) {
-    path.push(current);
-    paths.push([...path]);
-    path.pop();
-    return;
-  }
-
-  visited.add(`${r}-${c}`);
-  path.push(current);
-
-  const directions = [
-    [0, 1],
-    [1, 0],
-    [0, -1],
-    [-1, 0],
-  ];
-
-  for (const [dr, dc] of directions) {
-    const nr = r + dr;
-    const nc = c + dc;
-    if (
-      nr >= 0 &&
-      nr < rows &&
-      nc >= 0 &&
-      nc < cols &&
-      !visited.has(`${nr}-${nc}`)
-    ) {
-      dfs([nr, nc], goal, visited, path, paths, rows, cols);
-    }
-  }
-
-  path.pop();
-  visited.delete(`${r}-${c}`);
-}
-
-function generateAllHamiltonianPaths(
+function findHamiltonianPaths(
   start: [number, number],
   goal: [number, number],
   rows: number,
@@ -62,15 +13,57 @@ function generateAllHamiltonianPaths(
   const paths: [number, number][][] = [];
   const path: [number, number][] = [];
   const visited = new Set<string>();
-  dfs(start, goal, visited, path, paths, rows, cols);
+
+  function dfs(current: [number, number]) {
+    const [r, c] = current;
+    if (
+      visited.size === rows * cols - 1 &&
+      current[0] === goal[0] &&
+      current[1] === goal[1]
+    ) {
+      path.push(current);
+      paths.push([...path]);
+      path.pop();
+      return;
+    }
+
+    visited.add(`${r}-${c}`);
+    path.push(current);
+
+    const directions = [
+      [0, 1],
+      [1, 0],
+      [0, -1],
+      [-1, 0],
+    ];
+
+    for (const [dr, dc] of directions) {
+      const nr = r + dr;
+      const nc = c + dc;
+      if (
+        nr >= 0 &&
+        nr < rows &&
+        nc >= 0 &&
+        nc < cols &&
+        !visited.has(`${nr}-${nc}`)
+      ) {
+        dfs([nr, nc]);
+      }
+    }
+
+    path.pop();
+    visited.delete(`${r}-${c}`);
+  }
+
+  dfs(start);
   return paths;
 }
 
-function passingLineList(path: [number, number][]): {
+function extractLinesFromPath(path: [number, number][]): {
   type: "horizontal" | "vertical";
   coord: [number, number];
 }[] {
-  const lineList: {
+  const lines: {
     type: "horizontal" | "vertical";
     coord: [number, number];
   }[] = [];
@@ -82,44 +75,57 @@ function passingLineList(path: [number, number][]): {
       Math.min(from[0], to[0]),
       Math.min(from[1], to[1]),
     ];
-    lineList.push({ type, coord });
+    lines.push({ type, coord });
   }
-  return lineList;
+  return lines;
 }
 
-function wallList(
+function selectRepresentativeLines(
+  filteredLines: {
+    type: "horizontal" | "vertical";
+    coord: [number, number];
+  }[][]
+): {
+  type: "horizontal" | "vertical";
+  coord: [number, number];
+}[] {
+  const representativeLines: {
+    type: "horizontal" | "vertical";
+    coord: [number, number];
+  }[] = [];
+
+  //TODO アルゴリズムを改善し、下記制約を満たしたまま、representativeLinesが最も短くなるようにする
+  //制約 : filterdLinesの各linesのうち少なくとも1つがrepresentativeLinesに含まれるようにする
+  filteredLines.forEach((lines) => {
+    if (lines.length > 0) {
+      const randomLine = lines[Math.floor(Math.random() * lines.length)];
+      representativeLines.push(randomLine);
+    }
+  });
+
+  return representativeLines;
+}
+
+function generateWalls(
   answerPath: [number, number][],
   remainingPaths: [number, number][][],
   rows: number,
   cols: number
 ): Walls {
-  const answerPassingLines = passingLineList(answerPath);
-  const remainsPassingLines = remainingPaths.map(passingLineList);
-
-  const filteredRemainingLines = remainsPassingLines.map((lines) =>
-    lines.filter(
-      (line) =>
-        !answerPassingLines.some(
-          (answerLine) =>
-            answerLine.type === line.type &&
-            answerLine.coord[0] === line.coord[0] &&
-            answerLine.coord[1] === line.coord[1]
-        )
+  const answerLines = new Set(
+    extractLinesFromPath(answerPath).map(
+      (line) => `${line.type}-${line.coord[0]}-${line.coord[1]}`
     )
   );
 
-  const selectedLines: {
-    type: "horizontal" | "vertical";
-    coord: [number, number];
-  }[] = [];
-  // filteredRemainingLinesの各linesから、少なくとも1つのlineがserlectedLinesに含まれるようにする
+  const filteredLines = remainingPaths.map((path) =>
+    extractLinesFromPath(path).filter(
+      (line) =>
+        !answerLines.has(`${line.type}-${line.coord[0]}-${line.coord[1]}`)
+    )
+  );
 
-  filteredRemainingLines.forEach((lines) => {
-    if (lines.length > 0) {
-      const randomLine = lines[Math.floor(Math.random() * lines.length)];
-      selectedLines.push(randomLine);
-    }
-  });
+  const representativeLines = selectRepresentativeLines(filteredLines);
 
   const horizontal = Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => false)
@@ -128,7 +134,7 @@ function wallList(
     Array.from({ length: cols }, () => false)
   );
 
-  for (const { type, coord } of selectedLines) {
+  for (const { type, coord } of representativeLines) {
     const [r, c] = coord;
 
     if (type === "horizontal") {
@@ -142,12 +148,10 @@ function wallList(
 }
 
 export function generateGridData(rows: number, cols: number) {
-  // 空のグリッドを作成
   const cellContent: string[][] = Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => "")
   );
 
-  // row + col が偶数のセルを収集
   const evenCells: [number, number][] = [];
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
@@ -157,11 +161,9 @@ export function generateGridData(rows: number, cols: number) {
     }
   }
 
-  // 偶数セルから異なる2つをランダムに選択
   const shuffled = evenCells.sort(() => Math.random() - 0.5);
   const [start, goal] = [shuffled[0], shuffled[1]];
 
-  // S と G を配置
   const decidedCells = new Set<string>();
   if (start) {
     cellContent[start[0]][start[1]] = "S";
@@ -173,18 +175,16 @@ export function generateGridData(rows: number, cols: number) {
   }
 
   let answerPath: [number, number][] | null = null;
-  let walls: Walls = { horizontal: [], vertical: [] }; // 初期化
+  let walls: Walls = { horizontal: [], vertical: [] };
 
   if (start && goal) {
-    const paths = generateAllHamiltonianPaths(start, goal, rows, cols);
+    const paths = findHamiltonianPaths(start, goal, rows, cols);
 
     answerPath = paths[Math.floor(Math.random() * paths.length)];
-    console.log("Selected Hamiltonian Path (Answer):", answerPath);
 
     const remainingPaths = paths.filter((path) => path !== answerPath);
-    console.log("Remaining Hamiltonian Paths:", remainingPaths);
 
-    walls = wallList(answerPath, remainingPaths, rows, cols); // 初期化済みのwallsに値を代入
+    walls = generateWalls(answerPath, remainingPaths, rows, cols);
 
     answerPath.forEach(([r, c], index) => {
       if (!decidedCells.has(`${r}-${c}`)) {
@@ -195,5 +195,5 @@ export function generateGridData(rows: number, cols: number) {
     return { cellContent, answerPath, walls };
   }
 
-  return { cellContent, answerPath, walls }; // 初期化済みのwallsを返す
+  return { cellContent, answerPath, walls };
 }
