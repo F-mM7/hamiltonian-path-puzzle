@@ -114,7 +114,7 @@ function selectRepresentativeLines(
       }
     });
 
-    let bestLine: string | null = null;
+    let bestLine: string = "";
     let maxCoverage = 0;
 
     lineCoverage.forEach((coveredSets, lineKey) => {
@@ -211,7 +211,7 @@ function generateWalls(
   return { horizontal, vertical };
 }
 
-export function generateGridData(rows: number, cols: number) {
+export async function generateGridData(rows: number, cols: number) {
   const cellContent: string[][] = Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => "")
   );
@@ -252,12 +252,13 @@ export function generateGridData(rows: number, cols: number) {
 
     walls = generateWalls(answerPath, remainingPaths, rows, cols);
 
-    answerWord = getRandomWord(); // 外部ファイルからランダムに選択
-    step = Math.floor(answerPath.length - 1) / answerWord.length;
+    answerWord = await getRandomWord(); // 非同期処理を待つ
+    step = Math.floor(answerPath.length / answerWord.length);
 
     answerPath.forEach(([r, c], index) => {
       if (index === 0) cellContent[r][c] = "Ｓ";
-      else if (index === answerPath?.length - 1) cellContent[r][c] = "Ｇ";
+      else if (answerPath && index === answerPath.length - 1)
+        cellContent[r][c] = "Ｇ";
       else if ((index + 1) % step === 0) {
         cellContent[r][c] = answerWord[(index + 1) / step - 1];
       } else {

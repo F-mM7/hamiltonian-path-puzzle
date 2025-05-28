@@ -1,27 +1,46 @@
 import "./App.css";
 import Grid from "./component/Grid";
-import { generateGridData } from "./utils/gridUtils";
-import AnswerCheck from "./component/AnswerCheck"; // 新しいコンポーネントをインポート
-import { useState } from "react";
+import { generateGridData, type Walls } from "./utils/gridUtils";
+import AnswerCheck from "./component/AnswerCheck";
+import { useState, useEffect } from "react";
 
 function App() {
   const rows = 5;
   const cols = 5;
 
-  const [gridData, setGridData] = useState(() => generateGridData(rows, cols));
-  const { cellContent, walls, answerWord, step } = gridData;
+  const [gridData, setGridData] = useState<{
+    cellContent: string[][];
+    walls: Walls;
+    answerWord: string;
+    step: number;
+    answerPath: [number, number][] | null;
+  } | null>(null);
+
+  useEffect(() => {
+    const fetchGridData = async () => {
+      const data = await generateGridData(rows, cols);
+      setGridData(data);
+    };
+    fetchGridData();
+  }, [rows, cols]);
+
+  const handleAnswerCorrect = async () => {
+    const newGridData = await generateGridData(rows, cols);
+    setGridData(newGridData); // 新しいGridを生成
+  };
 
   const borderStyles = {
     thin: "1px solid gray",
     thick: "3px solid white",
   };
 
-  const handleAnswerCorrect = () => {
-    setGridData(generateGridData(rows, cols)); // 新しいGridを生成
-  };
+  if (!gridData) {
+    return <div>Loading...</div>; // 初期ロード中の表示
+  }
+
+  const { cellContent, walls, answerWord, step } = gridData;
 
   console.log(answerWord);
-
   return (
     <>
       <>{step}</>

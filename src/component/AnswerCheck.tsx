@@ -9,7 +9,10 @@ const AnswerCheck: React.FC<AnswerCheckProps> = ({ answerWord, onCorrect }) => {
   const [input, setInput] = useState("");
 
   const handleSubmit = () => {
-    if (input === answerWord) onCorrect();
+    if (input === answerWord) {
+      onCorrect();
+      setInput(""); // 正解時に入力をリセット
+    }
   };
 
   return (
