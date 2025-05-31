@@ -38,6 +38,8 @@ const Grid: React.FC<GridProps> = ({
               alignItems: "center",
               justifyContent: "center",
               fontSize: `${cellSize * 0.4}px`,
+              color:
+                cell === "Ｓ" ? "pink" : cell === "Ｇ" ? "skyblue" : "white",
               borderTop:
                 rowIndex === 0
                   ? borderStyles.thick
